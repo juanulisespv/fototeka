@@ -15,16 +15,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Verificar que la configuración esté completa en el entorno de producción
-if (process.env.NODE_ENV === 'production') {
-  const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-  const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
-  
-  if (missingFields.length > 0) {
-    throw new Error(`Missing Firebase configuration: ${missingFields.join(', ')}`);
-  }
+// Verificar que la configuración esté completa
+const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
+
+if (missingFields.length > 0) {
+  console.error('❌ Missing Firebase configuration:', missingFields);
+  throw new Error(`Missing Firebase configuration: ${missingFields.join(', ')}`);
 }
 
+// Debug en desarrollo (sin mostrar claves completas)
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔥 Firebase Status:', {
+    apiKey: firebaseConfig.apiKey ? '✅ Loaded' : '❌ Missing',
+    authDomain: firebaseConfig.authDomain || '❌ Missing', 
+    projectId: firebaseConfig.projectId || '❌ Missing',
+    storageBucket: firebaseConfig.storageBucket || '❌ Missing',
+  });
+}
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
