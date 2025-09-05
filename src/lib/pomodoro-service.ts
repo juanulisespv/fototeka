@@ -98,6 +98,31 @@ export async function updateProject(
   }
 }
 
+// Debug function to check saved sessions
+export async function debugGetSessions(userId: string): Promise<any[]> {
+  try {
+    console.log('🔍 Checking sessions for user:', userId);
+    const sessionsQuery = query(
+      collection(db, SESSIONS_COLLECTION),
+      where('userId', '==', userId)
+    );
+    
+    const snapshot = await getDocs(sessionsQuery);
+    const sessions = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    console.log('📄 Found sessions:', sessions.length);
+    console.log('Sessions data:', sessions);
+    
+    return sessions;
+  } catch (error) {
+    console.error('❌ Error fetching sessions for debug:', error);
+    return [];
+  }
+}
+
 export async function deleteProject(projectId: string): Promise<void> {
   try {
     await deleteDoc(doc(db, PROJECTS_COLLECTION, projectId));
@@ -119,8 +144,19 @@ export async function recordSession(
   notes?: string
 ): Promise<string> {
   try {
+    console.log('📝 Recording session with data:', {
+      userId,
+      projectId,
+      projectName,
+      sessionType,
+      plannedDuration,
+      actualDuration,
+      interrupted,
+      notes
+    });
+
     const now = new Date();
-    const docRef = await addDoc(collection(db, SESSIONS_COLLECTION), {
+    const sessionData = {
       userId,
       projectId,
       projectName,
@@ -130,20 +166,30 @@ export async function recordSession(
       completedAt: now.toISOString(),
       interrupted,
       notes: notes || '',
-    });
+    };
+
+    console.log('💾 Saving to Firestore collection:', SESSIONS_COLLECTION);
+    const docRef = await addDoc(collection(db, SESSIONS_COLLECTION), sessionData);
+    console.log('✅ Session saved with ID:', docRef.id);
 
     // Update project statistics
     if (sessionType === 'work' && !interrupted) {
+      console.log('📊 Updating project statistics for:', projectId);
       const projectRef = doc(db, PROJECTS_COLLECTION, projectId);
       const projectDoc = await getDoc(projectRef);
       
       if (projectDoc.exists()) {
         const projectData = projectDoc.data();
-        await updateDoc(projectRef, {
+        const updateData = {
           totalTime: projectData.totalTime + actualDuration,
           sessionsCompleted: projectData.sessionsCompleted + 1,
           updatedAt: now.toISOString(),
-        });
+        };
+        console.log('📈 Updating project with:', updateData);
+        await updateDoc(projectRef, updateData);
+        console.log('✅ Project updated successfully');
+      } else {
+        console.log('⚠️ Project document not found:', projectId);
       }
     }
     

@@ -70,6 +70,8 @@ interface HourData {
 export function PomodoroCharts({ sessions, projects }: PomodoroChartsProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<ChartPeriod>('30d');
 
+  // ...existing code...
+
   // Filtrar sesiones por período
   const filteredSessions = useMemo(() => {
     const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
@@ -118,9 +120,12 @@ export function PomodoroCharts({ sessions, projects }: PomodoroChartsProps) {
 
   // Datos por proyecto
   const projectData = useMemo(() => {
+  // ...existing code...
+    
     const projectStats: { [key: string]: ProjectData } = {};
 
     projects.forEach(project => {
+  // ...existing code...
       projectStats[project.id] = {
         name: project.name,
         totalMinutes: 0,
@@ -139,6 +144,8 @@ export function PomodoroCharts({ sessions, projects }: PomodoroChartsProps) {
         if (!session.interrupted) {
           stats.completedSessions += 1;
         }
+      } else {
+  // ...existing code...
       }
     });
 
@@ -147,7 +154,8 @@ export function PomodoroCharts({ sessions, projects }: PomodoroChartsProps) {
       stats.productivity = stats.sessions > 0 ? (stats.completedSessions / stats.sessions) * 100 : 0;
     });
 
-    return Object.values(projectStats).filter(stats => stats.sessions > 0);
+    const result = Object.values(projectStats).filter(stats => stats.sessions > 0);
+    return result;
   }, [filteredSessions, projects]);
 
   // Datos por hora del día

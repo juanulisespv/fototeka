@@ -29,7 +29,7 @@ import {
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PomodoroProject, PomodoroSession, PomodoroStats } from '@/lib/types';
-import { getUserSessions, getSessionsByDateRange } from '@/lib/pomodoro-service';
+import { getUserSessions, getSessionsByDateRange, debugGetSessions } from '@/lib/pomodoro-service';
 import { PomodoroCharts } from '@/components/pomodoro-charts';
 import { useToast } from '@/hooks/use-toast';
 
@@ -153,6 +153,16 @@ export function PomodoroHistory({ projects, userId }: PomodoroHistoryProps) {
       lastSessionDate: sessions.length > 0 ? sessions[0].completedAt : '',
       dailyGoal: 8,
       dailyProgress: todaySessions.length,
+    });
+  };
+
+  // Debug function to check sessions
+  const debugSessions = async () => {
+    console.log('🔧 Debug: Checking sessions for user:', userId);
+    const debugResult = await debugGetSessions(userId);
+    toast({
+      title: 'Debug Sessions',
+      description: `Se encontraron ${debugResult.length} sesiones. Ver consola para detalles.`,
     });
   };
 
@@ -351,6 +361,9 @@ export function PomodoroHistory({ projects, userId }: PomodoroHistoryProps) {
               Historial de Sesiones
             </span>
             <div className="flex gap-2">
+              <Button onClick={debugSessions} size="sm" variant="secondary" className="gap-2">
+                🔧 Debug
+              </Button>
               <Button onClick={exportToCSV} size="sm" variant="outline" className="gap-2">
                 <Download className="w-4 h-4" />
                 CSV
@@ -525,7 +538,7 @@ export function PomodoroHistory({ projects, userId }: PomodoroHistoryProps) {
 
         {/* Charts Tab */}
         <TabsContent value="charts">
-          <PomodoroCharts sessions={sessions} projects={projects} />
+          <PomodoroCharts sessions={filteredSessions} projects={projects} />
         </TabsContent>
       </Tabs>
     </div>

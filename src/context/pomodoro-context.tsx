@@ -5,6 +5,7 @@ import { TimerState, PomodoroProject, PomodoroSettings, SessionType } from '@/li
 import { recordSession } from '@/lib/pomodoro-service';
 import { soundManager } from '@/lib/sound-manager';
 import { useDynamicFavicon } from '@/hooks/use-dynamic-favicon';
+import { useAuth } from '@/context/auth-context';
 
 interface PomodoroContextType {
   timerState: TimerState;
@@ -93,6 +94,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 }
 
 export function PomodoroProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth(); // Usar el contexto de autenticación
   const [selectedProject, setSelectedProject] = React.useState<PomodoroProject | null>(null);
   const [settings, setSettings] = React.useState<PomodoroSettings>({
     workDuration: 25,
@@ -143,7 +145,6 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<Date | null>(null);
   const notificationRef = useRef<Notification | null>(null);
-  const userIdRef = useRef<string | null>(null);
 
   // Save timer state to localStorage whenever it changes
   useEffect(() => {
@@ -180,12 +181,8 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
 
   // Set user ID from context if available
   useEffect(() => {
-    const userFromStorage = localStorage.getItem('currentUser');
-    if (userFromStorage) {
-      const user = JSON.parse(userFromStorage);
-      userIdRef.current = user.uid;
-    }
-  }, []);
+  // ...existing code...
+  }, [user]);
 
   // Dynamic favicon based on timer state
   const isTimerActive = timerState.status === 'running' || timerState.status === 'paused';
@@ -263,10 +260,17 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
     const actualDuration = Math.ceil((timerState.totalTime - timerState.timeRemaining) / 60);
     
     // Record session if it's a work session and user is available
-    if (selectedProject && timerState.sessionType === 'work' && userIdRef.current) {
+    if (selectedProject && timerState.sessionType === 'work' && user?.uid) {
       try {
+        console.log('Recording session:', {
+          userId: user.uid,
+          projectId: selectedProject.id,
+          sessionType: timerState.sessionType,
+          actualDuration
+        });
+        
         await recordSession(
-          userIdRef.current,
+          user.uid,
           selectedProject.id,
           selectedProject.name,
           timerState.sessionType,
@@ -274,9 +278,17 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
           actualDuration,
           false
         );
+        
+        console.log('Session recorded successfully');
       } catch (error) {
         console.error('Error recording session:', error);
       }
+    } else {
+      console.log('Session not recorded:', {
+        hasProject: !!selectedProject,
+        sessionType: timerState.sessionType,
+        hasUser: !!user?.uid
+      });
     }
 
     // Play notification sound
@@ -332,12 +344,12 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
 
   const stopTimer = async () => {
     // Record interrupted session if applicable
-    if (timerState.status === 'running' && selectedProject && timerState.sessionType === 'work' && userIdRef.current) {
+    if (timerState.status === 'running' && selectedProject && timerState.sessionType === 'work' && user?.uid) {
       const actualDuration = Math.ceil((timerState.totalTime - timerState.timeRemaining) / 60);
       if (actualDuration > 0) {
         try {
           await recordSession(
-            userIdRef.current,
+            user.uid,
             selectedProject.id,
             selectedProject.name,
             timerState.sessionType,

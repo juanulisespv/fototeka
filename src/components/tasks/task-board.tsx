@@ -289,7 +289,7 @@ export default function TaskBoard() {
                             </SelectContent>
                         </Select>
 
-                        <div className="flex items-center gap-2 w-full sm:w-40">
+                        <div className="task-slider-container">
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -320,7 +320,7 @@ export default function TaskBoard() {
                 <div className="flex-1 overflow-auto -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
                     <div className="pb-4">
                         <SortableContext items={groupIds} strategy={horizontalListSortingStrategy}>
-                            <div className={cn("grid gap-6", gridClasses[gridCols])}>
+                            <div className={cn("task-board-grid", gridClasses[gridCols])}>
                                 {displayedGroups.map(group => (
                                     <TaskGroupColumn 
                                         key={group.id}
