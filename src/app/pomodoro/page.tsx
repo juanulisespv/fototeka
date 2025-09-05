@@ -118,12 +118,12 @@ export default function PomodoroPage() {
 
         <TabsContent value="timer" className="space-y-6">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
+            <div className="order-1 xl:order-1 xl:col-span-2">
               <PomodoroTimer
                 projects={projects}
               />
             </div>
-            <div className="xl:col-span-1 order-first xl:order-last">
+            <div className="order-2 xl:order-2 xl:col-span-1">
               <DailySummary projects={projects} />
             </div>
           </div>

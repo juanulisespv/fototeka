@@ -279,7 +279,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
           false
         );
         
-        console.log('Session recorded successfully');
+  // ...existing code...
       } catch (error) {
         console.error('Error recording session:', error);
       }

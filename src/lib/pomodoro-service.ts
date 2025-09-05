@@ -144,16 +144,6 @@ export async function recordSession(
   notes?: string
 ): Promise<string> {
   try {
-    console.log('📝 Recording session with data:', {
-      userId,
-      projectId,
-      projectName,
-      sessionType,
-      plannedDuration,
-      actualDuration,
-      interrupted,
-      notes
-    });
 
     const now = new Date();
     const sessionData = {
@@ -168,13 +158,13 @@ export async function recordSession(
       notes: notes || '',
     };
 
-    console.log('💾 Saving to Firestore collection:', SESSIONS_COLLECTION);
+  // ...existing code...
     const docRef = await addDoc(collection(db, SESSIONS_COLLECTION), sessionData);
-    console.log('✅ Session saved with ID:', docRef.id);
+  // ...existing code...
 
     // Update project statistics
     if (sessionType === 'work' && !interrupted) {
-      console.log('📊 Updating project statistics for:', projectId);
+  // ...existing code...
       const projectRef = doc(db, PROJECTS_COLLECTION, projectId);
       const projectDoc = await getDoc(projectRef);
       
@@ -185,11 +175,11 @@ export async function recordSession(
           sessionsCompleted: projectData.sessionsCompleted + 1,
           updatedAt: now.toISOString(),
         };
-        console.log('📈 Updating project with:', updateData);
+  // ...existing code...
         await updateDoc(projectRef, updateData);
-        console.log('✅ Project updated successfully');
+  // ...existing code...
       } else {
-        console.log('⚠️ Project document not found:', projectId);
+        // ...existing code...
       }
     }
     
