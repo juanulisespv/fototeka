@@ -77,4 +77,34 @@ export interface Campaign {
     nanoseconds: number;
   };
 }
+
+// Social Media Analytics Types
+export type SocialNetwork = 'LinkedIn' | 'Instagram' | 'YouTube' | 'Facebook' | 'Pinterest' | 'TikTok';
+
+export interface FollowerRecord {
+  id: string;
+  userId: string;
+  socialNetwork: SocialNetwork;
+  followerCount: number;
+  recordedAt: string; // ISO string
+  createdAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
+}
+
+export interface SocialNetworkStats {
+  network: SocialNetwork;
+  currentFollowers: number;
+  previousFollowers: number;
+  growth: number;
+  growthPercentage: number;
+  lastUpdated: string;
+}
+
+export interface DateFilter {
+  type: 'daily' | 'weekly' | 'monthly' | 'custom';
+  startDate?: string;
+  endDate?: string;
+}
     

@@ -2,7 +2,7 @@
 'use client'
 
 import { useSidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { Home, Calendar, ListTodo, Lightbulb } from 'lucide-react';
+import { Home, Calendar, ListTodo, Lightbulb, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -48,6 +48,14 @@ export function MainNav() {
                 <SidebarMenuButton tooltip='Tareas' isActive={pathname.includes('/tasks')}>
                     <ListTodo />
                     <span>Tareas</span>
+                </SidebarMenuButton>
+            </Link>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+            <Link href="/analytics" className='w-full' onClick={handleLinkClick}>
+                <SidebarMenuButton tooltip='Analytics' isActive={pathname.includes('/analytics')}>
+                    <BarChart3 />
+                    <span>Analytics</span>
                 </SidebarMenuButton>
             </Link>
         </SidebarMenuItem>
