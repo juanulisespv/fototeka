@@ -107,4 +107,74 @@ export interface DateFilter {
   startDate?: string;
   endDate?: string;
 }
+
+// Pomodoro Types
+export type TimerStatus = 'idle' | 'running' | 'paused' | 'completed';
+export type SessionType = 'work' | 'break' | 'longBreak';
+export type NotificationSound = 'bell' | 'chime' | 'beep' | 'digital' | 'gentle' | 'custom';
+
+export interface SoundOption {
+  id: NotificationSound;
+  name: string;
+  description: string;
+  file?: string; // For custom sounds
+}
+
+export interface PomodoroProject {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  totalTime: number; // total minutes worked
+  sessionsCompleted: number;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+}
+
+export interface PomodoroSession {
+  id: string;
+  userId: string;
+  projectId: string;
+  projectName: string;
+  sessionType: SessionType;
+  plannedDuration: number; // minutes
+  actualDuration: number; // minutes
+  completedAt: string; // ISO string
+  interrupted: boolean;
+  notes?: string;
+}
+
+export interface PomodoroSettings {
+  workDuration: number; // minutes, default 25
+  shortBreakDuration: number; // minutes, default 5
+  longBreakDuration: number; // minutes, default 15
+  sessionsUntilLongBreak: number; // default 4
+  autoStartBreaks: boolean;
+  autoStartWork: boolean;
+  soundEnabled: boolean;
+  notificationsEnabled: boolean;
+  soundVolume: number; // 0-100
+  notificationSound: NotificationSound; // selected sound type
+}
+
+export interface TimerState {
+  status: TimerStatus;
+  sessionType: SessionType;
+  timeRemaining: number; // seconds
+  totalTime: number; // seconds
+  currentProject?: PomodoroProject;
+  sessionsCompleted: number;
+  isBreakTime: boolean;
+}
+
+export interface PomodoroStats {
+  totalSessions: number;
+  totalTimeWorked: number; // minutes
+  averageSessionTime: number; // minutes
+  projectsWorkedOn: number;
+  streakDays: number;
+  lastSessionDate: string;
+  dailyGoal: number; // sessions per day
+  dailyProgress: number; // sessions completed today
+}
     

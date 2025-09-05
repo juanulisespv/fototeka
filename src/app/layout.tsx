@@ -9,6 +9,7 @@ import { MainNav } from '@/components/main-nav';
 import { LogOut, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { AuthProvider, useAuth } from '@/context/auth-context';
+import { PomodoroProvider } from '@/context/pomodoro-context';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -90,12 +91,14 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-          <ThemeProvider>
-            <AppContent>
-              {children}
-            </AppContent>
-            <Toaster />
-          </ThemeProvider>
+          <PomodoroProvider>
+            <ThemeProvider>
+              <AppContent>
+                {children}
+              </AppContent>
+              <Toaster />
+            </ThemeProvider>
+          </PomodoroProvider>
         </AuthProvider>
       </body>
     </html>
