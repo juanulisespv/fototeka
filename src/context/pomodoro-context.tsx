@@ -27,7 +27,7 @@ type TimerAction =
   | { type: 'PAUSE_TIMER' }
   | { type: 'STOP_TIMER' }
   | { type: 'RESET_TIMER'; workDuration: number }
-  | { type: 'TICK' }
+  | { type: 'TICK'; forceTime?: number }
   | { type: 'COMPLETE_SESSION'; nextSessionType: SessionType; nextDuration: number; sessionsCompleted: number }
   | { type: 'UPDATE_DURATIONS'; settings: PomodoroSettings }
   | { type: 'SET_NEXT_SESSION'; sessionType: SessionType; duration: number };
@@ -52,6 +52,12 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
       };
     
     case 'TICK':
+      if (typeof action.forceTime === 'number') {
+        return {
+          ...state,
+          timeRemaining: Math.max(0, action.forceTime),
+        };
+      }
       return {
         ...state,
         timeRemaining: Math.max(0, state.timeRemaining - 1),
@@ -143,7 +149,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   const [timerState, dispatch] = useReducer(timerReducer, getInitialTimerState());
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<Date | null>(null);
+  const startTimeRef = useRef<number | null>(null); // timestamp en ms
   const notificationRef = useRef<Notification | null>(null);
 
   // Save timer state to localStorage whenever it changes
@@ -191,14 +197,26 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   // Timer interval effect
   useEffect(() => {
     if (timerState.status === 'running') {
+      // Guardar el tiempo de inicio si no está definido
+      if (!startTimeRef.current) {
+        startTimeRef.current = Date.now() - (timerState.totalTime - timerState.timeRemaining) * 1000;
+      }
       intervalRef.current = setInterval(() => {
-        dispatch({ type: 'TICK' });
+        if (startTimeRef.current) {
+          const now = Date.now();
+          const elapsed = Math.floor((now - startTimeRef.current) / 1000);
+          const newTimeRemaining = Math.max(0, timerState.totalTime - elapsed);
+          if (newTimeRemaining !== timerState.timeRemaining) {
+            dispatch({ type: 'TICK', forceTime: newTimeRemaining });
+          }
+        }
       }, 1000);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      startTimeRef.current = null;
     }
 
     return () => {
@@ -206,7 +224,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [timerState.status]);
+  }, [timerState.status, timerState.totalTime]);
 
   // Handle session completion
   useEffect(() => {
@@ -333,7 +351,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    startTimeRef.current = new Date();
+  startTimeRef.current = Date.now() - (timerState.totalTime - timerState.timeRemaining) * 1000;
     dispatch({ type: 'START_TIMER' });
     return true;
   };
